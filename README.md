@@ -3,6 +3,8 @@
 このパックはmeitetsu600Vが作成した600VsSignalpackをrtm-mc-wrapperを用いて
 マルチバージョン対応したものです。
 
+このモデルパックは [rtm-mc-wrapper](https://github.com/anatawa12/rtm-mc-wrapper) の公式exampleです。
+
 ## 前提パック
 rtm-mc-wrapper ver1.x.x
 ダウンロード: https://github.com/anatawa12/rtm-mc-wrapper/releases
