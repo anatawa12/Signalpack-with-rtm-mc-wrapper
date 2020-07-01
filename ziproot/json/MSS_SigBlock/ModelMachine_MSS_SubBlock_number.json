@@ -1,0 +1,15 @@
+{
+    "name": "MSS_SubBlock_number",
+    "model": {
+        "modelFile": "MSS_SubBlock_course.mqo",
+        "textures": [ [ "default", "textures/MSS_SigBlock/MSS_SubBlock_number.png", "Alphablend,Light" ] ],
+        "rendererPath": "scripts/MSS_SigBlock/renderMSS_SigCol_wool.js"
+    },
+    "buttonTexture": "textures/MSS_SigBlock/button/MSS_SubBlock_number.png",
+    "machineType": "Light",
+    "rotateByMetadata": false,
+    "brightness": [ 0, 15 ],
+    "smoothing": true,
+    "doCulling": false,
+    "accuracy": "LOW"
+}

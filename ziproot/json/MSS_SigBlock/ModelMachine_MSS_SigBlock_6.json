@@ -1,0 +1,15 @@
+{
+    "name": "MSS_SigBlock_6",
+    "model": {
+        "modelFile": "MSS_SigBlock_6.mqo",
+        "textures": [ [ "default", "textures/MSS_SigBlock/MSS_SigBlock.png", "Alphablend,Light" ] ],
+        "rendererPath": "scripts/MSS_SigBlock/renderMSS_SigCol_glass.js"
+    },
+    "buttonTexture": "textures/MSS_SigBlock/button/MSS_SigBlock_6.png",
+    "machineType": "Light",
+    "rotateByMetadata": false,
+    "brightness": [ 0, 15 ],
+    "smoothing": true,
+    "doCulling": false,
+    "accuracy": "LOW"
+}
