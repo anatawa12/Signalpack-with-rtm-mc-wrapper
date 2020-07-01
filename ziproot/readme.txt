@@ -2,6 +2,7 @@ this file is encoded with UTF-8
 kono fairu ha UTF-8 de hozon sarete imasu
 
 Signal pack with rtm-mc-wrapper
+  ver1.0.0
 
 このパックはmeitetsu600Vが作成した信号機を追加するパックをrtm-mc-wrapperを用いてマルチバージョン対応したものです。
 
