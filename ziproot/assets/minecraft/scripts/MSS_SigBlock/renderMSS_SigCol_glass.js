@@ -1,4 +1,5 @@
 var renderClass = "jp.ngt.rtm.render.MachinePartsRenderer";
+
 importPackage(Packages.org.lwjgl.opengl);
 importPackage(Packages.jp.ngt.ngtlib.renderer);
 importPackage(Packages.jp.ngt.rtm.render);
@@ -10,6 +11,8 @@ importPackage(Packages.net.minecraft.command.server);
 importPackage(Packages.net.minecraft.init);
 importClass(java.util.HashMap);
 importPackage(Packages.jp.ngt.rtm.electric);
+
+//include <minecraft:mc-wrapper/all.js>
 
 var ErrorData = new HashMap();
 
@@ -26,13 +29,14 @@ function init(par1, par2) {
 }
 
 function render(entity, pass, par3) {
+    var wEntity = WTileEntity.wrap(entity)
     if (0 <= pass || pass <= 2) {
         GL11.glPushMatrix();
         base.render(renderer);
         GL11.glPopMatrix();
 
         if (entity === null) return;
-        
+
         var error = ErrorData.get(entity);
         if (error === null) {
             ErrorData.put(entity, {});
@@ -42,11 +46,12 @@ function render(entity, pass, par3) {
         if (error.isError) {
             if (!error.drawed) {
                 var player = NGTUtil.getClientPlayer();
-                var pos = [Math.floor(entity.field_145851_c), Math.floor(entity.field_145848_d), Math.floor(entity.field_145849_e)];
+                var pos = [Math.floor(wEntity.x), Math.floor(wEntity.y), Math.floor(wEntity.z)];
 
                 NGTLog.sendChatMessage(player, "§b[EditableDepSign] §cエラーが発生しました");
                 NGTLog.sendChatMessage(player, "Pos:" + pos.join(", "));
                 NGTLog.sendChatMessage(player, "Info:§e" + error.info);
+                NGTLog.sendChatMessage(player, "Error:§e" + error.error.toString());
                 if (error.hasStackTrace) {
                     //NGTLog.sendChatMessage(player, "Error:" + error.error);
                     NGTLog.sendChatMessage(player, "StackTrace:" + error.stackTrace);
@@ -64,43 +69,42 @@ function render(entity, pass, par3) {
         //ErrorData.put(entity, error);
 
         try {
-            // Blocks.field_150425_aM; ソウルサンド
-	    // Blocks.field_150340_R;  金ブロック
-	    // Blocks.field_150399_cn; 色ガラス
-
             //信号照会ブロック
-            var delayBlockData = Blocks.field_150399_cn;
-            var delayBlock = searchBlockAndMeta(entity, delayBlockData, null);
-            var isDelaying = delayBlock[0] !== null;
-        }
-
-
-
-
-        catch (e) {
+            var delayBlock = searchBlockAndMeta(wEntity, "minecraft:stained_glass", null);
+            var isDelaying = delayBlock !== null;
+        } catch (e) {
             error.isError = true;
             error.hasStackTrace = true;
             error.error = e;
             error.stackTrace = e.stack;
             error.info = "不明なエラー";
-            error.command = command;
             ErrorData.put(entity, error);
         }
 
 
 
-		switch (delayBlock[1]) {
-		   case 1:
+		switch (delayBlock ? delayBlock.color : 0) {
+            case "red":
+                GL11.glPushMatrix();
+                pt1.render(renderer);
+                GL11.glPopMatrix();
+                break;
+		   case "orange":
 		       	GL11.glPushMatrix();
      	  		pt2.render(renderer);
     	   		GL11.glPopMatrix();
 			break;
-		   case 4:
+		   case "yellow":
 		       	GL11.glPushMatrix();
       	 		pt3.render(renderer);
      	  		GL11.glPopMatrix();
 			break;
-		   case 5:
+            case "cyan":
+                GL11.glPushMatrix();
+                pt4.render(renderer);
+                GL11.glPopMatrix();
+                break;
+		   case "lime":
 			var light = renderer.getTick(entity)*24;
 			var si = NGTMath.toRadians(light);
 			var rotate = NGTMath.getSin(si);
@@ -112,25 +116,15 @@ function render(entity, pass, par3) {
 			}
    	    		GL11.glPopMatrix();
 			break;
-		   case 9:
-		       	GL11.glPushMatrix();
-    	   		pt4.render(renderer);
-    	   		GL11.glPopMatrix();
-			break;
-		   case 11:
+            case "green":
+                GL11.glPushMatrix();
+                pt6.render(renderer);
+                GL11.glPopMatrix();
+                break;
+		   case "blue":
 		       	GL11.glPushMatrix();
     	   		pt7.render(renderer);
      	  		GL11.glPopMatrix();
-			break;
-		   case 13:
-		       	GL11.glPushMatrix();
-	       		pt6.render(renderer);
- 	      		GL11.glPopMatrix();
-			break;
-		   case 14:
-		       	GL11.glPushMatrix();
-      	 		pt1.render(renderer);
-      	 		GL11.glPopMatrix();
 			break;
 	 	  default:
 		       	GL11.glPushMatrix();
@@ -141,37 +135,28 @@ function render(entity, pass, par3) {
     }
 }
 
-
-
-//metadataにnullを与えると全metadataが対象になる
-//返り値:[block(Block型), meta(Int型)]
+/**
+ * @param entity {WTileEntity}
+ * @param blockType {string} the id of the block
+ * @param metadata {number|null} the meta to search. if null, all meta is allowed
+ * @return {WBlock|null}
+ */
 function searchBlockAndMeta(entity, blockType, metadata) {
-    var x = Math.floor(entity.field_145851_c);
-    var y = Math.floor(entity.field_145848_d);
-    var z = Math.floor(entity.field_145849_e);
+    var x = Math.floor(entity.x);
+    var y = Math.floor(entity.y);
+    var z = Math.floor(entity.z);
     var searchMaxCount = 32;//判定深さ
-    var world = entity.func_145831_w();
+    var world = entity.world;
+    //NGTLog.sendChatMessage(NGTUtil.getClientPlayer(), "world: " + world + ", x: " + x + ", y: " + y + ", z: " + z)
     for (var i = 1; i <= searchMaxCount; i++) {
-        var block = world.func_147439_a(x, y - i, z);
-        if (block === blockType) {
+        var block = world.getBlock(x, y - i, z);
+        if (block.name === blockType) {
             if (metadata !== null) {
-                if (world.func_72805_g(x, y - i, z) === metadata) return [block, world.func_72805_g(x, y - i, z)];
+                if (block.meta === metadata)
+                    return block;
             }
-            return [block, world.func_72805_g(x, y - i, z)];
+            return block;
         }
-    }
-    return [null, 0];
-}
-
-function searchTileEntity(entity, typeName) {
-    var x = Math.floor(entity.field_145851_c);
-    var y = Math.floor(entity.field_145848_d);
-    var z = Math.floor(entity.field_145849_e);
-    var searchMaxCount = 32;//判定深さ
-    var world = entity.func_145831_w();
-    for (var i = 1; i <= searchMaxCount; i++) {
-        var block = world.func_147438_o(x, y - i, z);
-        if (block instanceof typeName) return block;
     }
     return null;
 }

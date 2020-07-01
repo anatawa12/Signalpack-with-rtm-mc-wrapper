@@ -1,3 +1,26 @@
+this file is encoded with UTF-8
+kono fairu ha UTF-8 de hozon sarete imasu
+
+Signal pack with rtm-mc-wrapper
+
+このパックはmeitetsu600Vが作成した信号機を追加するパックをrtm-mc-wrapperを用いてマルチバージョン対応したものです。
+
+前提パック:
+rtm-mc-wrapper ver1.x.xの最新版
+ダウンロードリンクはこちら: https://github.com/anatawa12/rtm-mc-wrapper/releases
+
+LICENSE:
+MIT License
+
+2020/07/01 21:54:00(JST) 時点の 水音車両利用規約(本案1) 個別事項A 2.4に基づき、MIT Licenseでの公開を行います。
+
+追加されるモデルは以下を参照してください。
+
+連絡先
+　twitter:@kakerigawa
+  github:@anatawa12
+
+============== 以下元パックのREADME ==============
 600V`s Signal pack Testver
 
 このパックはmeitetsu600Vが作成した信号機を追加するパックです。

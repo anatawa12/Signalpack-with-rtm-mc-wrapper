@@ -11,6 +11,8 @@ importPackage(Packages.net.minecraft.init);
 importClass(java.util.HashMap);
 importPackage(Packages.jp.ngt.rtm.electric);
 
+//include <minecraft:mc-wrapper/all.js>
+
 var ErrorData = new HashMap();
 
 function init(par1, par2) {
@@ -25,6 +27,7 @@ function init(par1, par2) {
 }
 
 function render(entity, pass, par3) {
+    var wEntity = WTileEntity.wrap(entity)
     if (0 <= pass || pass <= 2) {
         GL11.glPushMatrix();
         base.render(renderer);
@@ -41,7 +44,7 @@ function render(entity, pass, par3) {
         if (error.isError) {
             if (!error.drawed) {
                 var player = NGTUtil.getClientPlayer();
-                var pos = [Math.floor(entity.field_145851_c), Math.floor(entity.field_145848_d), Math.floor(entity.field_145849_e)];
+                var pos = [Math.floor(wEntity.x), Math.floor(wEntity.y), Math.floor(wEntity.z)];
 
                 NGTLog.sendChatMessage(player, "§b[EditableDepSign] §cエラーが発生しました");
                 NGTLog.sendChatMessage(player, "Pos:" + pos.join(", "));
@@ -64,14 +67,12 @@ function render(entity, pass, par3) {
 
         try {
             //信号照会ブロック(メタ式)
-            var MetaBlockData = Blocks.field_150425_aM;//ソウルサンド
-            var MetaBlock = searchBlockAndMeta(entity, MetaBlockData, null);
-            var isMetaBlock = MetaBlock[0] !== null;   
+            var MetaBlock = searchBlockAndMeta(wEntity, "minecraft:soul_sand", null);
+            var isMetaBlock = MetaBlock !== null;
 
             //信号照会ブロック(色式)
-            var ColorBlockData = Blocks.field_150359_w;//色ガラス
-            var ColorBlock = searchBlockAndMeta(entity, ColorBlockData, null);
-            var isColorBlock = ColorBlock[0] !== null;
+            var ColorBlock = searchBlockAndMeta(wEntity, "minecraft:stained_glass", null);
+            var isColorBlock = ColorBlock !== null;
         }
         catch (e) {
             error.isError = true;
@@ -79,12 +80,11 @@ function render(entity, pass, par3) {
             error.error = e;
             error.stackTrace = e.stack;
             error.info = "不明なエラー";
-            error.command = command;
             ErrorData.put(entity, error);
         }
 
 
-		switch (MetaBlock[1]) {
+		switch (MetaBlock ? MetaBlock.meta : 0) {
 		   case 1:
 		       	GL11.glPushMatrix();
       	 		pt1.render(renderer);
@@ -167,37 +167,27 @@ function render(entity, pass, par3) {
     }
 }
 
-
-
-//metadataにnullを与えると全metadataが対象になる
-//返り値:[block(Block型), meta(Int型)]
+/**
+ * @param entity {WTileEntity}
+ * @param blockType {string} the id of the block
+ * @param metadata {number|null} the meta to search. if null, all meta is allowed
+ * @return {WBlock|null}
+ */
 function searchBlockAndMeta(entity, blockType, metadata) {
-    var x = Math.floor(entity.field_145851_c);
-    var y = Math.floor(entity.field_145848_d);
-    var z = Math.floor(entity.field_145849_e);
+    var x = Math.floor(entity.x);
+    var y = Math.floor(entity.y);
+    var z = Math.floor(entity.z);
     var searchMaxCount = 32;//判定深さ
-    var world = entity.func_145831_w();
+    var world = entity.world;
     for (var i = 1; i <= searchMaxCount; i++) {
-        var block = world.func_147439_a(x, y - i, z);
-        if (block === blockType) {
+        var block = world.getBlock(x, y - i, z);
+        if (block.name === blockType) {
             if (metadata !== null) {
-                if (world.func_72805_g(x, y - i, z) === metadata) return [block, world.func_72805_g(x, y - i, z)];
+                if (block.meta === metadata)
+                    return block;
             }
-            return [block, world.func_72805_g(x, y - i, z)];
+            return block;
         }
-    }
-    return [null, 0];
-}
-
-function searchTileEntity(entity, typeName) {
-    var x = Math.floor(entity.field_145851_c);
-    var y = Math.floor(entity.field_145848_d);
-    var z = Math.floor(entity.field_145849_e);
-    var searchMaxCount = 32;//判定深さ
-    var world = entity.func_145831_w();
-    for (var i = 1; i <= searchMaxCount; i++) {
-        var block = world.func_147438_o(x, y - i, z);
-        if (block instanceof typeName) return block;
     }
     return null;
 }
